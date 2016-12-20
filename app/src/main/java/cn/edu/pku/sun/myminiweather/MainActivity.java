@@ -1,24 +1,24 @@
 package cn.edu.pku.sun.myminiweather;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Notification;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
-import android.net.Uri;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+
 
 import com.example.hasee.myminiweather.R;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -32,19 +32,27 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
+
 import cn.edu.pku.sun.bean.TodayWeather;
 import cn.edu.pku.sun.util.NetUtil;
 
 /**
  * Created by hasee on 2016/9/20.
  */
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener   {
     private static final int UPDATE_TODAY_WEATHER =1;
     private ImageView mUpdateBtn;
+    private ImageView mCitySelect;
+    private ImageView mGetLocation;
+    private LocationClient mLocationClient;
+    protected MenuItem refreshItem;
     private TextView cityTv, timeTv, humidTv, weekTv, pmDataTv, pmQualityTv,
             temperatureTv, climateTv, windTv, city_name_Tv;
     private ImageView weatherImg, pmImg;
-    private String weathersrc;
     private Handler mHandler = new Handler(){
         public void handleMessage(android.os.Message msg){
             switch (msg.what){
@@ -70,7 +78,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         climateTv = (TextView) findViewById(R.id.climate);
         windTv = (TextView) findViewById(R.id.wind);
         weatherImg = (ImageView) findViewById(R.id.weather_img);
-
         city_name_Tv.setText("N/A");
         cityTv.setText("N/A");
         timeTv.setText("N/A");
@@ -82,6 +89,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         climateTv.setText("N/A");
         windTv.setText("N/A");
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,10 +106,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
             Log.d("myWeather", "网络挂了");
             Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
         }
+        mCitySelect=(ImageView )findViewById(R.id.title_city_manager);
+        mCitySelect.setOnClickListener(this);
+        mGetLocation=(ImageView )findViewById(R.id.title_location);
+        mGetLocation.setOnClickListener(this);
         initView();
 
     }
     void updateTodayWeather(TodayWeather todayWeather){
+        if(todayWeather.getPm25() ==null){
+            todayWeather.setPm25("null");
+       }
         city_name_Tv.setText(todayWeather.getCity()+"天气");
         cityTv.setText(todayWeather.getCity());
         timeTv.setText(todayWeather.getUpdatetime()+"发布");
@@ -116,9 +131,77 @@ public class MainActivity extends Activity implements View.OnClickListener {
         selectPm(todayWeather.getPm25());
         Toast.makeText(MainActivity.this,"更新成功!",Toast.LENGTH_SHORT).show();
     }
+  /*  private void getLocalCityName(Context context) {
+        LocationClientOption option = new LocationClientOption();
+        option.setOpenGps(true);// 打开GPS
+        option.setAddrType("all");// 返回的定位结果包含地址信息
+        option.setCoorType("bd09ll");// 返回的定位结果是百度经纬度,默认值gcj02
+        option.setScanSpan(3000);// 设置发起定位请求的间隔时间为3000ms
+        option.disableCache(false);// 禁止启用缓存定位
+        option.setPriority(LocationClientOption.NetWorkFirst);// 网络定位优先
+        mLocationClient = new LocationClient(context); // 声明LocationClient类
+        mLocationClient.setLocOption(option);// 使用设置
+        mLocationClient.start();// 开启定位SDK
+        mLocationClient.requestLocation();// 开始请求位置
 
+        mLocationClient.registerLocationListener(new BDLocationListener() {
+            public void onReceivePoi(BDLocation arg) {
+
+            }
+
+            @Override
+            public void onReceiveLocation(BDLocation location) {
+                if (location != null) {
+                   // tv_city.setText(location.getCity());
+                    Log.e("TAG",""+location.getCity());
+
+                } else {
+                  //  tv_city.setText("无法定位");
+                    return;
+                }
+            }
+        });
+
+    }
+    */
     @Override
     public void onClick(View view) {
+        if (view.getId() == R.id.title_city_manager){
+            Intent i=new Intent(this,SelectCity.class);
+            startActivityForResult(i,1);
+        }
+        if(view.getId() == R.id.title_location){
+            LocationClientOption option = new LocationClientOption();
+            option.setOpenGps(true);// 打开GPS
+            option.setAddrType("all");// 返回的定位结果包含地址信息
+            option.setCoorType("bd09ll");// 返回的定位结果是百度经纬度,默认值gcj02
+            option.setScanSpan(3000);// 设置发起定位请求的间隔时间为3000ms
+            option.disableCache(false);// 禁止启用缓存定位
+            option.setPriority(LocationClientOption.NetWorkFirst);// 网络定位优先
+            mLocationClient = new LocationClient(this); // 声明LocationClient类
+            mLocationClient.setLocOption(option);// 使用设置
+            mLocationClient.start();// 开启定位SDK
+            mLocationClient.requestLocation();// 开始请求位置
+
+            mLocationClient.registerLocationListener(new BDLocationListener() {
+                public void onReceivePoi(BDLocation arg) {
+
+                }
+
+                @Override
+                public void onReceiveLocation(BDLocation location) {
+                    if (location != null) {
+                        // tv_city.setText(location.getCity());
+                        Log.e("myWeather",""+location.getCity());
+
+                    } else {
+                        //  tv_city.setText("无法定位");
+                        Log.e("myWeather","无法定位");
+                        return;
+                    }
+                }
+            });
+        }
         if (view.getId() == R.id.title_update_btn) {
             SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
             String cityCode = sharedPreferences.getString("main_city_code", "101010100");
@@ -130,6 +213,68 @@ public class MainActivity extends Activity implements View.OnClickListener {
             } else {
                 Log.d("myWeather", "网络挂了");
                 Toast.makeText(MainActivity.this, "网络挂了!", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.title_update_btn:
+                showRefreshAnimation(item);
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+    @SuppressLint("NewApi")
+    private void showRefreshAnimation(MenuItem item) {
+        hideRefreshAnimation();
+
+        refreshItem = item;
+
+        //这里使用一个ImageView设置成MenuItem的ActionView，这样我们就可以使用这个ImageView显示旋转动画了
+        ImageView refreshActionView = (ImageView) getLayoutInflater().inflate(R.layout.weather_info, null);
+        refreshActionView.setImageResource(R.drawable.title_update);
+        refreshItem.setActionView(refreshActionView);
+
+        //显示刷新动画
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.abc_slide_out_top);
+        refreshActionView.startAnimation(animation);
+        Log.d("MainActivity", "延迟1秒");
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                hideRefreshAnimation();
+            }
+
+        }, 1000);
+    }
+
+    @SuppressLint("NewApi")
+    private void hideRefreshAnimation() {
+        if (refreshItem != null) {
+            View view = refreshItem.getActionView();
+            if (view != null) {
+                view.clearAnimation();
+                refreshItem.setActionView(null);
+            }
+        }
+    }
+
+
+
+    protected void onActivityResult(int requestCode,int resultCode,Intent data){
+        if (requestCode==1&&resultCode==RESULT_OK){
+            String newCityCode=data.getStringExtra("cityCode");
+            Log.d("myWeather","选择的城市代码为"+newCityCode);
+
+            if (NetUtil.getNetworkState(this)!=NetUtil.NETWORN_NONE){
+                Log.d("myWeather","网络ok");
+                queryWeatherCode(newCityCode);
+            }else {
+                Log.d("myWeather","网络挂了");
+                Toast.makeText(MainActivity.this,"网络挂了",Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -314,6 +459,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
     public void selectPm(String str) {
+        if(str=="null"){
+           str="500";
+      }
         int pm2_5 = Integer.parseInt(str);
         if (pm2_5<=50){
             pmImg.setImageResource(R.drawable.biz_plugin_weather_0_50);return;
