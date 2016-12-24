@@ -3,10 +3,13 @@ package cn.edu.pku.sun.myminiweather;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -32,19 +35,24 @@ import cn.edu.pku.sun.bean.City;
 public class SelectCity extends Activity implements View.OnClickListener {
     private ImageView mBackBtn;
     private ListView lv;
+    private TextView selectcity_tv;
     private String[] name={"第1组","第2组","第3组","第4组","第5组","第6组","第7组","第8组","第9组","第10组",
             "第11组","第12组","第13组","第14组","第15组","第16组","第17组","第18组","第19组","第20组",
             "第21组","第22组","第23组"};
     private ArrayList<String> cityname=new ArrayList<String>();
     private ArrayList<String> citycode=new ArrayList<String>();
+    private ArrayAdapter<String> adapter;
     private List<Map<String,Object>> listems = new ArrayList<Map<String,Object>>();
     private MyApplication myapp;
     private List<City> mycity;
     private String mycode;
+    private EditText medittext;
+   // private String[] data=;
 
     protected void onCreate(Bundle saveInstanceState) {
         super.onCreate(saveInstanceState);
         setContentView(R.layout.select_city);
+        selectcity_tv=(TextView )findViewById(R.id.title_name);
         mBackBtn = ( ImageView ) findViewById(R.id.title_back);
         lv = (ListView ) findViewById(R.id.listView);
         mBackBtn.setOnClickListener(this);
@@ -61,7 +69,38 @@ public class SelectCity extends Activity implements View.OnClickListener {
                 String weathercity= ( String ) listems.get(i).get("city");
                 String weathercode= ( String ) listems.get(i).get("code");
                 mycode = weathercode;
+                selectcity_tv.setText("当前城市："+weathercity);
                 Toast.makeText(SelectCity.this,"你点击了:"+weathercity,Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        medittext=(EditText )findViewById(R.id.search_edit);
+        medittext.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                Log.d("EditText", "beforeTextChanged");
+            }
+
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String searchContent = s.toString();
+                ArrayList<String> newDataList = new ArrayList<String>();
+                for (int i = 0; i <cityname.size(); i++){
+                    if (cityname.get(i).substring(0, searchContent.length()).equals(searchContent)){
+                        newDataList.add(cityname.get(i));
+                    }
+                }
+                int j = 0;
+                for(; j < newDataList.size(); j++){
+                    name[j] = newDataList.get(j);
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
         myapp=(MyApplication) getApplication();

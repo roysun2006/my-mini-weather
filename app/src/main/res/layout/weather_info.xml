@@ -59,6 +59,7 @@
             android:layout_toLeftOf="@id/title_share"
             android:src="@drawable/base_action_bar_action_city" />
     </RelativeLayout>
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -241,6 +242,41 @@
         </RelativeLayout>
 
         <!-- 六日天气信息 -->
+        <!--七日天气信息-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <android.support.v4.view.ViewPager
+                android:id="@+id/six_day_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </android.support.v4.view.ViewPager>
+            <LinearLayout
+                android:id="@+id/weather_info_page"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="18.0dip"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:clickable="true"
+                    android:padding="15.0dip"
+                    android:src="@drawable/dot" />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:clickable="true"
+                    android:padding="15.0dip"
+                    android:src="@drawable/dot" />
+            </LinearLayout>
+        </RelativeLayout>
+
 
         <!-- 广告等信息 -->
 
