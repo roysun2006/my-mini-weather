@@ -243,8 +243,8 @@ public class MainActivity extends Activity implements View.OnClickListener ,View
                 @Override
                 public void onReceiveLocation(BDLocation location) {
                     if (location != null) {
-                        cityTv.setText(location.getCity());
-                        Log.e("myWeather",""+location.getCity());
+                        cityTv.setText(location.getDistrict());
+                        Log.e("myWeather",""+location.getDistrict());
                         return;
 
                     } else {
