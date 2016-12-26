@@ -243,8 +243,9 @@ public class MainActivity extends Activity implements View.OnClickListener ,View
                 @Override
                 public void onReceiveLocation(BDLocation location) {
                     if (location != null) {
-                        // tv_city.setText(location.getCity());
+                        cityTv.setText(location.getCity());
                         Log.e("myWeather",""+location.getCity());
+                        return;
 
                     } else {
                         //  tv_city.setText("无法定位");
@@ -558,7 +559,7 @@ public class MainActivity extends Activity implements View.OnClickListener ,View
                 climateTv.setText( "not found" );
             }
         }
-        Toast.makeText( MainActivity.this,"更新成功！", Toast.LENGTH_LONG ).show();
+        //Toast.makeText( MainActivity.this,"更新成功！", Toast.LENGTH_LONG ).show();
     }
     private void refreshWeatherType(TextView climateTv, ImageView weatherImg,TodayWeather todayWeather){
         Resources res = getResources();
